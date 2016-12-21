@@ -3,11 +3,32 @@
  */
 window.onload = getMyLocation;
 
+var watchId = null;
+var options = {enableHighAccuracy: true, timeout:100, maximumAge: 0};
+var prevCoords = null;
+var minDistance = 20; // meters
+
 function getMyLocation(){
     if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(displayLocation, displayError)
+        var watchButton = document.getElementById("watch");
+        watchButton.onclick = watchLocation;
+        var clearWatchButton = document.getElementById("clearWatch");
+        clearWatchButton.onclick = clearWatch;
     } else {
         alert("Oops, no geolocation support");
+    }
+}
+
+function watchLocation(){
+    watchId = navigator.geolocation.watchPosition(displayLocation,
+                                                  displayError,
+                                                  options);
+}
+
+function clearWatch(){
+    if(watchId){
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
     }
 }
 
@@ -24,13 +45,23 @@ function displayLocation(position){
 
     var div = document.getElementById("location");
     div.innerHTML = "You are at Latitude: " + latitude + ", Longitude: " + longitude;
+    div.innerHTML += " (found in " + options.timeout + " milliseconds)";
     div.innerHTML += " (with " + position.coords.accuracy + " meters accuracy)";
 
     var km = computeDistance(position.coords, ourCoords, radiusEarthKM);
     var distance = document.getElementById("distance");
     distance.innerHTML = "You are " + km + " km from the WickedlySmart HQ";
 
-    //showMap(position.coords);
+    if(map == null){
+        showMap(position.coords);
+        prevCoords = position.coords;
+    } else {
+        var meters = computeDistance(position.coords, prevCoords, radiusEarthKM) * 1000;
+        if (meters > minDistance){
+            scrollMapToPosition(position.coords);
+            prevCoords = position.coords;
+        }
+    }
 }
 
 function displayError(error){
@@ -46,6 +77,22 @@ function displayError(error){
     }
     var div = document.getElementById("location");
     div.innerHTML = errorMessage;
+    options.timeout += 100;
+    navigator.geolocation.getCurrentPosition(
+        displayLocation,
+        displayError,
+        options);
+    div.innerHTML += " ... checking again with timeout=" + options.timeout;
+}
+
+function scrollMapToPosition(coords){
+    var latitude = coords.latitude;
+    var longitude = coords.longitude;
+    var latlong = new google.maps.LatLng(latitude, longitude);
+
+    map.panTo(latlong);
+
+    addMarker(map, latlong, "Your new location", "You moved to: " + latitude + ", " + longitude);
 }
 
 /**
@@ -95,7 +142,7 @@ function showMap(coords){
  * From: https://developers.google.com/maps/documentation/javascript/geolocation
  */
 function initMap() {
-    var map = new google.maps.Map(document.getElementById("map"), {
+    map = new google.maps.Map(document.getElementById("map"), {
         center: {lat: -34.397, lng: 150.644},
         zoom: 10
     });
@@ -122,7 +169,8 @@ function initMap() {
             addMarker(map, pos, title, content)
         }, function() {
             handleLocationError(true, infoWindow, map.getCenter());
-        });
+        },
+            options);
     } else {
         // Browser doesn't support Geolocation
         handleLocationError(false, infoWindow, map.getCenter());
