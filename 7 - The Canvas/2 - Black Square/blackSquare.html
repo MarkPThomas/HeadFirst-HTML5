@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Look What I Drew</title>
+  <meta charset="utf-8">
+  <style>
+    canvas {
+    border: 1px solid black;
+    }
+  </style>
+  <script>
+    window.onload = function(){
+      var canvas = document.getElementById("tshirtCanvas");
+      var context = canvas.getContext("2d");
+      context.fillRect(10, 10, 100, 100);
+    };
+  </script>
+</head>
+<body>
+  <canvas id="tshirtCanvas" width="600" height="200"></canvas>
+</body>
+</html>
