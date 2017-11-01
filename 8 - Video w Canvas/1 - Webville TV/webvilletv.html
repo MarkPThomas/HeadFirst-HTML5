@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Webville TV</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="webvilletv.css">
+</head>
+<body>
+<div id="tv">
+    <div id="tvConsole">
+        <div id="highlight">
+            <img src="../images/highlight.png" alt="highlight for tv">
+        </div>
+        <div id="videoDiv">
+            <video controls autoplay src="../video/preroll.mp4" width="480" height="360"
+                   poster="../images/prerollposter.jpg" id="video">
+                <!-- Alternatively, remove the 'src' attribute and use the following to attempt multiple formats: -->
+                <!--
+                <source src="video/preroll.mp4">
+                <source src="video/preroll.webm">
+                <source src="video/preroll.ogv">
+                <p>Sorry, your browser doesn’t support the video element</p>
+                -->
+            </video>
+        </div>
+    </div>
+</div>
+</body>
+</html>
